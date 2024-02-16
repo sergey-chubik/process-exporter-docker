@@ -1,0 +1,38 @@
+# Версия docker-compose
+version: '3'
+# Список наших сервисов (контейнеров)
+services:
+  process_exporter:
+    image: ncabatoff/process-exporter
+    container_name: process-exporter
+    volumes:
+      - /proc:/host/proc
+      - ./config/process-exporter.yml:/config/process-exporter.yml
+    ports:
+      - 9256:9256
+    privileged: true
+    command:
+      - -procfs=/host/proc
+      - -config.path=/config/process-exporter.yml
+    networks:
+      - local
+  prometheus:
+    image: prom/prometheus:v2.42.0
+    container_name: prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - local
+  grafana:
+    image: grafana/grafana:9.3.6
+    container_name: grafana
+    ports:
+      - 3000:3000
+    networks:
+      - local
+
+networks:
+  local:
+    driver: bridge
